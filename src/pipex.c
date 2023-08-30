@@ -11,49 +11,6 @@
 /* ************************************************************************** */
 #include "../pipex.h"
 
-char *find_path(char *cmd, char **envp)
-{
-    int i;
-    char *path;
-    char *path2;
-    char **posibles_path;
-
-    i = 0;
-    while (ft_strnstr(envp[i], "PATH", 4) == NULL)
-        i++; 
-    posibles_path = ft_split(envp[i] + 5, ':');
-    i = -1;
-    while (posibles_path[++i])
-    {
-        path2 = ft_strjoin(posibles_path[i], "/");
-        free(posibles_path[i]);
-        path = ft_strjoin(path2, cmd);
-        free (path2);
-        if (access(path, F_OK) == 0)
-            return (path);
-        free(path);
-    }
-    free(posibles_path);
-    return NULL;
-}
-
-void    execute(char *cmd, char **envp)
-{
-    char **simple_cmd;
-    char *path;
-    int     i;
-
-    simple_cmd = ft_split(cmd, ' ');
-    path = find_path(simple_cmd[0], envp);
-    if(execve(path, simple_cmd, envp) == -1)
-        perror("Error");
-    i = -1;
-    while (simple_cmd[++i])
-        free(simple_cmd[i]);
-    free (simple_cmd);
-    free (path);
-}
-
 void    child_process(char *file1, char *cmd, char **envp, int *fd)
 {
     int infile;
@@ -81,16 +38,21 @@ void    parent_process(char *file2, char *cmd, char **envp, int *fd)
     execute(cmd, envp);
 }
 
+/*void    leaks(void)
+{
+    system ("leaks -q pipex");
+}*/
 int main (int argc, char **argv, char**envp)
 {
+    // atexit(leaks);
     int     fd[2];
     pid_t   pid;
 
-    if (argv[1][0] == '\0' || argv[2][0] == '\0'
-    || argv[3][0] == '\0')
-        return 0;
     if (argc == 5)
     {
+        if (argv[1][0] == '\0' || argv[2][0] == '\0'
+        || argv[3][0] == '\0')
+            return 0;
         if (pipe(fd) == -1)
             perror("Error\n");
         pid = fork();
@@ -98,6 +60,10 @@ int main (int argc, char **argv, char**envp)
             child_process(argv[1], argv[2], envp, fd);
         waitpid(pid, NULL, 0);
         parent_process(argv[4], argv[3], envp, fd);
+    }
+    else
+    {
+        ft_putstr_fd("Error, invalid argv", 2);
     }
     return 0;
 }

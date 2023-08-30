@@ -23,8 +23,9 @@
 # include <sys/wait.h>
 # include "./libft/libft.h"
 
-
-//int main(void); 
 int main (int argc, char **argv, char**envp);
+char *find_path(char *cmd, char **envp);
+void    execute(char *cmd, char **envp);
+
 # endif
 
