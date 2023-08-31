@@ -26,6 +26,7 @@
 int main (int argc, char **argv, char**envp);
 char *find_path(char *cmd, char **envp);
 void    execute(char *cmd, char **envp);
+void    ft_error(void);
 
 # endif
 
