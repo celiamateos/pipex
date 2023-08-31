@@ -49,7 +49,7 @@ void	execute(char *cmd, char **envp)
 	char	**simple_cmd;
 	char	*path;
 	int		i;
-	int		ex;
+	int		ex = -1;
 
 	simple_cmd = ft_split(cmd, ' ');
 	if (cmd[0] != '/' && cmd[0] != '.')
@@ -57,14 +57,17 @@ void	execute(char *cmd, char **envp)
 		path = find_path(simple_cmd[0], envp);
 		if (path)
 			ex = execve(path, simple_cmd, envp);
+		free(path);
 	}
 	else
-		ex = execve(cmd, simple_cmd, envp);
+	{
+		if (access(cmd, F_OK) == 0)
+			ex = execve(cmd, simple_cmd, envp);
+	}
 	i = -1;
 	while (simple_cmd[++i])
 		free(simple_cmd[i]);
 	free (simple_cmd);
-	free (path);
 	if (ex < 0)
 		ft_error();
 }

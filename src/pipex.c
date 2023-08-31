@@ -38,8 +38,14 @@ void	parent_process(char *file2, char *cmd, char **envp, int *fd)
 	execute(cmd, envp);
 }
 
+void	leaks(void)
+{
+	system ("leaks -q pipex");
+}
+
 int	main(int argc, char **argv, char**envp)
 {
+	//atexit(leaks);
 	int		fd[2];
 	pid_t	pid;
 
@@ -47,9 +53,10 @@ int	main(int argc, char **argv, char**envp)
 	{
 		if ((!*envp && argv[2][0] != '/' && argv[3][0] != '/')
 		|| argv[1][0] == '\0' || argv[2][0] == '\0'
-		|| argv[3][0] == '\0' argv[1][0] == '\0'
-		|| argv[2][0] == '\0' || argv[3][0] == '\0')
-			return (1);
+		|| argv[3][0] == '\0' || argv[1][0] == '\0'
+		|| argv[2][0] == '\0' || argv[3][0] == '\0'
+		|| access(argv[1], R_OK) == -1)
+			ft_error();
 		if (pipe(fd) == -1)
 			ft_error();
 		pid = fork();
