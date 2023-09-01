@@ -12,12 +12,35 @@
 
 #include "../pipex.h"
 
-void	ft_error(void)
+void	ft_error(int n)
 {
-	//ft_putstr_fd("pipex: permission denied:\n", 2);
-	//perror("");
+	if (n == 0) {
+	ft_putstr_fd("Salida de errno:", 2);
 	ft_putstr_fd(strerror(errno), 2);
+	}
+	if (n == 1)
+		ft_putstr_fd("pipex: command not found: cmd \n", 2);
+	if (n == 2)
+		ft_putstr_fd("cmd1 cannot access 'cmd2': No such file or directory\noutfile", 2);
+	if (n == 3)
+		ft_putstr_fd("pipex: permission denied: \n", 2);
+	if (n == 4)
+		ft_putstr_fd("pipex: no such file or directory: \n", 2);
 	exit(EXIT_FAILURE);
+}
+
+void ft_check_args(char **argv, char **envp)
+{
+	if ((!*envp) && (argv[2][0] != '/' || argv[3][0] != '/'))
+		ft_error(2);
+	if ( argv[1][0] == '\0' || argv[4][0] == '\0')
+		ft_error(4);
+	if (argv[2][0] == '\0' || argv[3][0] == '\0')
+		ft_error(3);
+	if (access(argv[1], F_OK) == -1)
+		ft_error(4);
+	if (access(argv[1], R_OK) == -1)
+		ft_error(3);
 }
 
 char	*find_path(char *cmd, char **envp)
@@ -28,8 +51,10 @@ char	*find_path(char *cmd, char **envp)
 	char	**posibles_path;
 
 	i = 0;
-	while (ft_strnstr(envp[i], "PATH", 4) == NULL)
+	while (envp[i] != NULL && ft_strnstr(envp[i], "PATH", 4) == NULL)
 		i++;
+	if (envp[i] == NULL)
+		return (NULL);
 	posibles_path = ft_split(envp[i] + 5, ':');
 	i = -1;
 	while (posibles_path[++i])
@@ -71,5 +96,6 @@ void	execute(char *cmd, char **envp)
 		free(simple_cmd[i]);
 	free (simple_cmd);
 	if (ex < 0)
-		ft_error();
+		ft_error(1);
+
 }

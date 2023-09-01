@@ -17,7 +17,7 @@ void	child_process(char *file1, char *cmd, char **envp, int *fd)
 
 	infile = open(file1, O_RDONLY, 0777);
 	if (infile == -1)
-		ft_error();
+		ft_error(3);
 	dup2(infile, STDIN_FILENO);
 	dup2(fd[1], STDOUT_FILENO);
 	close(fd[0]);
@@ -31,7 +31,7 @@ void	parent_process(char *file2, char *cmd, char **envp, int *fd)
 
 	outfile = open(file2, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (outfile == -1)
-		ft_error();
+		ft_error(0);
 	dup2(fd[0], STDIN_FILENO);
 	dup2(outfile, STDOUT_FILENO);
 	(close(fd[1]), close (outfile));
@@ -51,14 +51,9 @@ int	main(int argc, char **argv, char**envp)
 
 	if (argc == 5)
 	{
-		if ((!*envp && argv[2][0] != '/' && argv[3][0] != '/')
-		|| argv[1][0] == '\0' || argv[2][0] == '\0'
-		|| argv[3][0] == '\0' || argv[1][0] == '\0'
-		|| argv[2][0] == '\0' || argv[3][0] == '\0'
-		|| access(argv[1], R_OK) == -1)
-			ft_error();
+		ft_check_args(argv, envp);
 		if (pipe(fd) == -1)
-			ft_error();
+			ft_error(0);
 		pid = fork();
 		if (pid == 0)
 			child_process(argv[1], argv[2], envp, fd);
