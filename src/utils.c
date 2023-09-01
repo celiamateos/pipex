@@ -14,7 +14,9 @@
 
 void	ft_error(void)
 {
-	perror("Error\n");
+	//ft_putstr_fd("pipex: permission denied:\n", 2);
+	//perror("");
+	ft_putstr_fd(strerror(errno), 2);
 	exit(EXIT_FAILURE);
 }
 
