@@ -22,12 +22,11 @@
 # include <limits.h>
 # include <sys/wait.h>
 # include "./libft/libft.h"
-#include <errno.h>
+# include <errno.h>
 
-int main (int argc, char **argv, char**envp);
-char *find_path(char *cmd, char **envp);
-void    execute(char *cmd, char **envp);
-void    ft_error(int n);
-void ft_check_args(char **argv, char **envp);
-# endif
-
+int		main(int argc, char **argv, char **envp);
+char	*find_path(char *cmd, char **envp);
+int		execute(char *cmd, char **envp);
+void	ft_error(int n, char *cmd1);
+void	ft_check_args(char **argv, char **envp);
+#endif

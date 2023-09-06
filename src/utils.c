@@ -12,35 +12,45 @@
 
 #include "../pipex.h"
 
-void	ft_error(int n)
+void	ft_error(int n, char *cmd)
 {
-	if (n == 0) {
-	ft_putstr_fd("Salida de errno:", 2);
-	ft_putstr_fd(strerror(errno), 2);
+	if (n == 0)
+	{
+		ft_putstr_fd("Salida de errno:", 2);
+		ft_putstr_fd(strerror(errno), 2);
 	}
 	if (n == 1)
-		ft_putstr_fd("pipex: command not found: cmd \n", 2);
-	if (n == 2)
-		ft_putstr_fd("cmd1 cannot access 'cmd2': No such file or directory\noutfile", 2);
+	{
+		ft_putstr_fd("pipex: command not found: ", 2);
+		ft_putstr_fd(cmd, 2);
+	}
 	if (n == 3)
-		ft_putstr_fd("pipex: permission denied: \n", 2);
+		ft_putstr_fd("pipex: permission denied: ", 2);
 	if (n == 4)
-		ft_putstr_fd("pipex: no such file or directory: \n", 2);
+	{
+		ft_putstr_fd("pipex: no such file or directory: ", 2);
+		ft_putstr_fd(cmd, 2);
+	}
+	ft_putstr_fd("\n", 2);
 	exit(EXIT_FAILURE);
 }
 
-void ft_check_args(char **argv, char **envp)
+void	ft_check_args(char **argv, char **envp)
 {
 	if ((!*envp) && (argv[2][0] != '/' || argv[3][0] != '/'))
-		ft_error(2);
-	if ( argv[1][0] == '\0' || argv[4][0] == '\0')
-		ft_error(4);
-	if (argv[2][0] == '\0' || argv[3][0] == '\0')
-		ft_error(3);
+		ft_error(0, NULL);
+	if (argv[1][0] == '\0')
+		ft_error(4, argv[1]);
+	if (argv[4][0] == '\0')
+		ft_error(4, argv[4]);
+	if (argv[2][0] == '\0')
+		ft_error(3, argv[2]);
+	if (argv[3][0] == '\0')
+		ft_error(3, argv[3]);
 	if (access(argv[1], F_OK) == -1)
-		ft_error(4);
+		ft_error(4, argv[1]);
 	if (access(argv[1], R_OK) == -1)
-		ft_error(3);
+		ft_error(3, NULL);
 }
 
 char	*find_path(char *cmd, char **envp)
@@ -71,13 +81,14 @@ char	*find_path(char *cmd, char **envp)
 	return (NULL);
 }
 
-void	execute(char *cmd, char **envp)
+int	execute(char *cmd, char **envp)
 {
 	char	**simple_cmd;
 	char	*path;
 	int		i;
-	int		ex = -1;
+	int		ex;
 
+	ex = -1;
 	simple_cmd = ft_split(cmd, ' ');
 	if (cmd[0] != '/' && cmd[0] != '.')
 	{
@@ -87,15 +98,13 @@ void	execute(char *cmd, char **envp)
 		free(path);
 	}
 	else
-	{
 		if (access(cmd, F_OK) == 0)
 			ex = execve(cmd, simple_cmd, envp);
-	}
 	i = -1;
 	while (simple_cmd[++i])
 		free(simple_cmd[i]);
 	free (simple_cmd);
 	if (ex < 0)
-		ft_error(1);
-
+		return (ft_error(1, cmd), 1);
+	return (0);
 }
