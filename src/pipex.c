@@ -42,20 +42,28 @@ void	child2_process(char *file2, char *cmd, char **envp, int *fd)
 
 static void	ft_wait_process(int *fd, int pid1, int pid2)
 {
+	int	status;
+
 	close(fd[0]);
 	close(fd[1]);
-	waitpid(pid1, NULL, 0);
-	waitpid(pid2, NULL, 0);
-}
-
-void	leaks(void)
-{
-	system ("leaks -q pipex");
+	waitpid(pid1, &status, 0);
+	if (WIFEXITED(status))
+	{
+		status = WEXITSTATUS(status);
+		if (status != EXIT_SUCCESS)
+			ft_error(0, NULL);
+	}
+	waitpid(pid2, &status, 0);
+	if (WIFEXITED(status))
+	{
+		status = WEXITSTATUS(status);
+		if (status != EXIT_SUCCESS)
+			ft_error(0, NULL);
+	}
 }
 
 int	main(int argc, char **argv, char**envp)
 {
-	atexit(leaks);
 	int		fd[2];
 	pid_t	pid1;
 	pid_t	pid2;
