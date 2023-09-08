@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 #include "../pipex.h"
 
-int	child_process(char *file1, char *cmd, char **envp, int *fd)
+void	child1_process(char *file1, char *cmd, char **envp, int *fd)
 {
 	int	infile;
 
@@ -23,11 +23,10 @@ int	child_process(char *file1, char *cmd, char **envp, int *fd)
 	close(fd[0]);
 	close(infile);
 	if (execute(cmd, envp))
-		return (1);
-	return (0);
+		ft_error(0, NULL);
 }
 
-void	parent_process(char *file2, char *cmd, char **envp, int *fd)
+void	child2_process(char *file2, char *cmd, char **envp, int *fd)
 {
 	int	outfile;
 
@@ -37,7 +36,16 @@ void	parent_process(char *file2, char *cmd, char **envp, int *fd)
 	dup2(fd[0], STDIN_FILENO);
 	dup2(outfile, STDOUT_FILENO);
 	(close(fd[1]), close (outfile));
-	execute(cmd, envp);
+	if (execute(cmd, envp))
+		ft_error(0, NULL);
+}
+
+static void	ft_wait_process(int *fd, int pid1, int pid2)
+{
+	close(fd[0]);
+	close(fd[1]);
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
 }
 
 void	leaks(void)
@@ -49,24 +57,27 @@ int	main(int argc, char **argv, char**envp)
 {
 	atexit(leaks);
 	int		fd[2];
-	pid_t	pid;
+	pid_t	pid1;
+	pid_t	pid2;
 
 	if (argc == 5)
 	{
 		ft_check_args(argv, envp);
 		if (pipe(fd) == -1)
 			ft_error(0, NULL);
-		pid = fork();
-		if (pid == 0)
-			if (child_process(argv[1], argv[2], envp, fd))
-				ft_error(0, NULL);
-		parent_process(argv[4], argv[3], envp, fd);
-		waitpid(-1, NULL, 0);
+		pid1 = fork();
+		if (pid1 == 0)
+			child1_process(argv[1], argv[2], envp, fd);
+		else
+		{
+			pid2 = fork();
+			if (pid2 == 0)
+				child2_process(argv[4], argv[3], envp, fd);
+			else
+				ft_wait_process(fd, pid1, pid2);
+		}
 	}
 	else
-	{
-		ft_putstr_fd("Error\n Invalid argv", 2);
-		ft_putstr_fd("Ex:./pipex infile cmd1 cmd2 outfile", 2);
-	}
+		ft_putstr_fd("Error\n Invalid arguments", 2);
 	return (0);
 }
