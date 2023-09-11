@@ -15,6 +15,8 @@ void	child1_process(char *file1, char *cmd, char **envp, int *fd)
 {
 	int	infile;
 
+	if (access(file1, F_OK) == -1)
+		ft_error(4, file1);
 	infile = open(file1, O_RDONLY, 0777);
 	if (infile == -1)
 		ft_error(3, file1);
@@ -76,12 +78,12 @@ int	main(int argc, char **argv, char**envp)
 		pid1 = fork();
 		if (pid1 == 0)
 			child1_process(argv[1], argv[2], envp, fd);
-		else
+		if (pid1 > 0)
 		{
 			pid2 = fork();
 			if (pid2 == 0)
 				child2_process(argv[4], argv[3], envp, fd);
-			else
+			if (pid2 > 0)
 				ft_wait_process(fd, pid1, pid2);
 		}
 	}

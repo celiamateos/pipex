@@ -24,7 +24,10 @@ void	ft_error(int n, char *cmd)
 		ft_putstr_fd(cmd, 2);
 	}
 	if (n == 3)
+	{
 		ft_putstr_fd("pipex: permission denied: ", 2);
+		ft_putstr_fd(cmd, 2);
+	}
 	if (n == 4)
 	{
 		ft_putstr_fd("pipex: no such file or directory: ", 2);
@@ -46,10 +49,6 @@ void	ft_check_args(char **argv, char **envp)
 		ft_error(3, argv[2]);
 	if (argv[3][0] == '\0')
 		ft_error(3, argv[3]);
-	//if (access(argv[1], F_OK) == -1)
-	//	ft_error(4, argv[1]);
-	//if (access(argv[1], R_OK) == -1)
-	//	ft_error(3, NULL);
 }
 
 char	*find_path(char *cmd, char **envp)
